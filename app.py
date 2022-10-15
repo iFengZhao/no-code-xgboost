@@ -80,10 +80,9 @@ if authentication_status:
 st.header('No Code XGBoost')
 st.info('This web app allows the user to run XGBoost models without writing a single line of code.', icon="ℹ")
 
-
-
 uploaded_file = st.file_uploader('Upload a CSV file', type="csv", key='file_uploader')
 use_example_data = st.checkbox('Use example dataset')
+st.write('Sklearn datasets will be supported in later development.')
 
 if use_example_data:
     df = load_example_data()
@@ -101,22 +100,25 @@ if use_example_data or uploaded_file is not None:
     col_names = df.columns
 
     st.subheader("Navigation")
-    main_tab1, main_tab2, main_tab3, main_tab4 = st.tabs(['📊 Data Exploration', '⏳ Parameter Tuning', '🚀 Run Model', '⚡ Modeling History'])
-
-    with main_tab1:
+    # main_tab1, main_tab2, main_tab3, main_tab4 = st.tabs(['📊 Data Exploration', '⏳ Parameter Tuning', '🚀 Run Model', '⚡ Modeling History'])
+    #
+    # with main_tab1:
+    if data_exploration == '📊 Data Exploration':
         st.subheader('Explore the data')
         with st.expander('Click to show the data'):
             st.dataframe(df)
-        with st.expander('Click to show the data description'):
-            st.dataframe(df.describe(include='all'))
+        # with st.expander('Click to show the data description'):
+        #     st.dataframe(df.describe(include='all'))
 
         col_options = st.multiselect('Specify the categorical columns', col_names)
         df[col_options] = df[col_options].astype(str)
 
-    with main_tab2:
+    # with main_tab2:
+    if data_exploration == '⏳ Parameter Tuning':
         st.write('Will be implemented shortly using Optuna')
 
-    with main_tab3:
+    # with main_tab3:
+    if data_exploration == '🚀 Run Model':
         # ss['splitted'] = False
         st.subheader('Prepare training and testing data')
         col_list = list(col_names)
@@ -252,7 +254,8 @@ if use_example_data or uploaded_file is not None:
                                 ss['feature_cols'], ss['label_col'], params, model_metrics)
                 st.success('The model results have been saved!')
 
-    with main_tab4:
+    # with main_tab4:
+    if data_exploration == '⚡ Modeling History':
         st.write('hello')
         models = db.fetch_all_models(username)
         # st.write(models)
