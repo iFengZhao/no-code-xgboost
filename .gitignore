@@ -1,0 +1,11 @@
+# Environments
+.env
+
+# streamlit folder
+.streamlit
+
+# Other
+.idea
+.ipynb_checkpoints
+__pycache__
+

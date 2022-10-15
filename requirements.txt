@@ -1,0 +1,9 @@
+streamlit
+sklearn
+pymongo[srv]
+xgboost
+pandas
+numpy
+matplotlib
+streamlit_option_menu
+streamlit_authenticator==0.1.5
