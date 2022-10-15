@@ -208,6 +208,7 @@ if use_example_data or uploaded_file is not None:
         if st.button('Run XGBoost 🚀'):
             ss['run_model'] = True
 
+        if ss['run_model']:
             st.write(ss['X_train'].head())
             X_train, X_test, y_train, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
 
@@ -220,8 +221,6 @@ if use_example_data or uploaded_file is not None:
 
             ss['xgb'] = run_xgb()
 
-
-        if ss['run_model']:
             model_metrics = {}
             model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(ss['xgb'], X_test, y_test)
             fp_r, tp_r, thresholds = roc
