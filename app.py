@@ -207,8 +207,6 @@ if use_example_data or uploaded_file is not None:
         # run_model = st.button('Run XGBoost 🚀')
         if st.button('Run XGBoost 🚀'):
             ss['run_model'] = True
-
-        if ss['run_model']:
             st.write(ss['X_train'].head())
             X_train, X_test, y_train, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
 
@@ -221,6 +219,17 @@ if use_example_data or uploaded_file is not None:
 
             ss['xgb'] = run_xgb()
 
+            model_datetime = str(datetime.now())
+            model_date = model_datetime[:10]
+            model_time = model_datetime[11:19]
+
+            if authentication_status:
+                db.insert_model(username, ss['filename'], model_date, model_time,
+                                ss['feature_cols'], ss['label_col'], params, model_metrics)
+                st.success('The model results have been saved!')
+
+        if ss['run_model']:
+            _, X_test, _, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
             model_metrics = {}
             model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(ss['xgb'], X_test, y_test)
             fp_r, tp_r, thresholds = roc
@@ -260,14 +269,7 @@ if use_example_data or uploaded_file is not None:
                 plot_importance(ss['xgb'], max_num_features=50, height=0.8, ax=ax)
                 st.pyplot(fig)
 
-            model_datetime = str(datetime.now())
-            model_date = model_datetime[:10]
-            model_time = model_datetime[11:19]
 
-            if authentication_status:
-                db.insert_model(username, filename, model_date, model_time,
-                                ss['feature_cols'], ss['label_col'], params, model_metrics)
-                st.success('The model results have been saved!')
 
     # with main_tab4:
     if data_exploration == '⚡ Modeling History':
