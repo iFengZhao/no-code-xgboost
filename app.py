@@ -10,6 +10,7 @@ from sklearn import metrics
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from sklearn.metrics import roc_curve
 from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_breast_cancer
 from xgboost import XGBClassifier, plot_importance
 import database as db
 
@@ -40,6 +41,18 @@ def get_metrics(model, X_test, y_test):
 
     return precision, recall, f1, accuracy, roc
 
+# Cached data
+@st.experimental_memo
+def load_data(file):
+    df = pd.read_csv(file, encoding='utf-8')
+    return df
+
+@st.experimental_memo
+def load_example_data():
+    df = pd.read_csv('credit.csv', encoding='utf-8')
+    return df
+
+
 
 # Authentication
 users = db.fetch_all_users()
@@ -50,7 +63,6 @@ hashed_passwords = stauth.Hasher(passwords).generate()
 
 authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
                                     "no-code-xgboost ", "abcdef", cookie_expiry_days=30)
-
 
 name, authentication_status, username = authenticator.login('Login', 'sidebar')
 
@@ -65,27 +77,26 @@ if authentication_status:
     authenticator.logout("Logout", "sidebar")
     st.sidebar.subheader(f"Welcome, {name} 👨‍💻")
 
-st.sidebar.subheader('Navigation')
-data_exploration = st.sidebar.radio('go to', ('📊 Data Exploration', '⏳ Parameter Tuning', '🚀 Run Model', '⚡ Modeling History'))
-
 st.header('No Code XGBoost')
 st.info('This web app allows the user to run XGBoost models without writing a single line of code.', icon="ℹ")
 
-@st.experimental_memo
-def load_data(file):
-    df = pd.read_csv(file, encoding='utf-8')
-    return df
 
-@st.experimental_memo
-def load_example_data():
-    df = pd.read_csv('credit.csv', encoding='utf-8')
-    return df
 
 uploaded_file = st.file_uploader('Upload a CSV file', type="csv", key='file_uploader')
+use_example_data = st.checkbox('Use example dataset')
+
+if use_example_data:
+    df = load_example_data()
+    filename = 'credit.csv'
 
 if uploaded_file is not None:
     df = load_data(uploaded_file)
+    filename = uploaded_file.name
 
+if use_example_data or uploaded_file is not None:
+    st.sidebar.subheader('Navigation')
+    data_exploration = st.sidebar.radio('go to', ('📊 Data Exploration', '⏳ Parameter Tuning',
+                                                  '🚀 Run Model', '⚡ Modeling History'))
 
     col_names = df.columns
 
@@ -232,12 +243,11 @@ if uploaded_file is not None:
                 plot_importance(xgb, max_num_features=50, height=0.8, ax=ax)
                 st.pyplot(fig)
 
-            if authentication_status:
-                model_datetime = str(datetime.now())
-                model_date = model_datetime[:10]
-                model_time = model_datetime[11:19]
-                filename = uploaded_file.name
+            model_datetime = str(datetime.now())
+            model_date = model_datetime[:10]
+            model_time = model_datetime[11:19]
 
+            if authentication_status:
                 db.insert_model(username, filename, model_date, model_time,
                                 ss['feature_cols'], ss['label_col'], params, model_metrics)
                 st.success('The model results have been saved!')
