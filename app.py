@@ -86,11 +86,11 @@ st.write('Sklearn datasets will be supported in later development.')
 
 if use_example_data:
     df = load_example_data()
-    filename = 'credit.csv'
+    ss['filename'] = 'credit.csv'
 
 if uploaded_file is not None:
     df = load_data(uploaded_file)
-    filename = uploaded_file.name
+    ss['filename'] = uploaded_file.name
 
 if use_example_data or uploaded_file is not None:
     st.sidebar.subheader('Navigation')
@@ -201,51 +201,53 @@ if use_example_data or uploaded_file is not None:
                 st.markdown('**Here are the parameters you specified:**')
                 params
 
-        if st.button('click to run XGBoost 🚀'):
-            st.write(X_train)
-            # X_train, X_test, y_train, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
-            # xgb = XGBClassifier(objective="binary:logistic", eval_metric="auc", use_label_encoder=False)
-            # xgb.set_params(**params)
-            # xgb.fit(X_train, y_train)
-            # model_metrics = {}
-            # model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(xgb, X_test, y_test)
-            # fp_r, tp_r, thresholds = roc
-            # model_metrics['auc_score'] = metrics.auc(fp_r, tp_r)
-            #
-            # model_bar = st.progress(0)
-            #
-            # for percent_complete in range(100):
-            #     time.sleep(0.1)
-            #     model_bar.progress(percent_complete + 1)
-            #
-            # st.success('Model runs successfully!')
-            #
-            # st.subheader('Check the model results')
-            # tab1, tab2, tab3 = st.tabs(["🔢 Metrics", "ROC Curve", "🎯 Feature Importance Chart"])
-            #
-            # with tab1:
-            #     m_col1, m_col2, m_col3, m_col4, m_col5= st.columns(5)
-            #     m_col1.metric("AUC", round(model_metrics['auc_score'], 3))
-            #     m_col2.metric("Precision", round(model_metrics['precision'], 3))
-            #     m_col3.metric("Recall", round(model_metrics['recall'], 3))
-            #     m_col4.metric("F1 Score", round(model_metrics['f1'], 3))
-            #     m_col5.metric("Accuracy", round(model_metrics['accuracy'], 3))
-            #
-            # with tab2:
-            #     fig = plt.figure(figsize=(8, 6))
-            #     plt.plot(fp_r, tp_r, label="AUC = %.3f" % model_metrics['auc_score'])
-            #     plt.plot([0, 1], [0, 1], "r--")
-            #     plt.ylabel("TP rate")
-            #     plt.xlabel("FP rate")
-            #     plt.legend(loc=4)
-            #     plt.title("ROC Curve")
-            #     st.pyplot(fig)
-            #
-            # with tab3:
-            #     fig, ax = plt.subplots(figsize=(6, 9))
-            #     plot_importance(xgb, max_num_features=50, height=0.8, ax=ax)
-            #     st.pyplot(fig)
-            #
+        st.subheader('Click the button below to run the model')
+        if st.button('Run XGBoost 🚀'):
+            st.write(ss['X_train'])
+            X_train, X_test, y_train, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
+            xgb = XGBClassifier(objective="binary:logistic", eval_metric="auc", use_label_encoder=False)
+            xgb.set_params(**params)
+            xgb.fit(X_train, y_train)
+
+            model_metrics = {}
+            model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(xgb, X_test, y_test)
+            fp_r, tp_r, thresholds = roc
+            model_metrics['auc_score'] = metrics.auc(fp_r, tp_r)
+
+            model_bar = st.progress(0)
+
+            for percent_complete in range(100):
+                time.sleep(0.1)
+                model_bar.progress(percent_complete + 1)
+
+            st.success('Model runs successfully!')
+
+            st.subheader('Check the model results')
+            tab1, tab2, tab3 = st.tabs(["🔢 Metrics", "ROC Curve", "🎯 Feature Importance Chart"])
+
+            with tab1:
+                m_col1, m_col2, m_col3, m_col4, m_col5= st.columns(5)
+                m_col1.metric("AUC", round(model_metrics['auc_score'], 3))
+                m_col2.metric("Precision", round(model_metrics['precision'], 3))
+                m_col3.metric("Recall", round(model_metrics['recall'], 3))
+                m_col4.metric("F1 Score", round(model_metrics['f1'], 3))
+                m_col5.metric("Accuracy", round(model_metrics['accuracy'], 3))
+
+            with tab2:
+                fig = plt.figure(figsize=(8, 6))
+                plt.plot(fp_r, tp_r, label="AUC = %.3f" % model_metrics['auc_score'])
+                plt.plot([0, 1], [0, 1], "r--")
+                plt.ylabel("TP rate")
+                plt.xlabel("FP rate")
+                plt.legend(loc=4)
+                plt.title("ROC Curve")
+                st.pyplot(fig)
+
+            with tab3:
+                fig, ax = plt.subplots(figsize=(6, 9))
+                plot_importance(xgb, max_num_features=50, height=0.8, ax=ax)
+                st.pyplot(fig)
+
             # model_datetime = str(datetime.now())
             # model_date = model_datetime[:10]
             # model_time = model_datetime[11:19]
