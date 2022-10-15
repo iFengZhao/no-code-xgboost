@@ -202,15 +202,28 @@ if use_example_data or uploaded_file is not None:
                 params
 
         st.subheader('Click the button below to run the model')
+        ss['xgb'] = ss.get('xgb', None)
+        ss['run_model'] = ss.get('run_model', False)
+        # run_model = st.button('Run XGBoost 🚀')
         if st.button('Run XGBoost 🚀'):
-            st.write(ss['X_train'])
-            X_train, X_test, y_train, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
-            xgb = XGBClassifier(objective="binary:logistic", eval_metric="auc", use_label_encoder=False)
-            xgb.set_params(**params)
-            xgb.fit(X_train, y_train)
+            ss['run_model'] = True
 
+            st.write(ss['X_train'].head())
+            X_train, X_test, y_train, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
+
+            @st.experimental_singleton
+            def run_xgb():
+                xgb = XGBClassifier(objective="binary:logistic", eval_metric="auc", use_label_encoder=False)
+                xgb.set_params(**params)
+                xgb.fit(X_train, y_train)
+                return xgb
+
+            ss['xgb'] = run_xgb()
+
+
+        if ss['run_model']:
             model_metrics = {}
-            model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(xgb, X_test, y_test)
+            model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(ss['xgb'], X_test, y_test)
             fp_r, tp_r, thresholds = roc
             model_metrics['auc_score'] = metrics.auc(fp_r, tp_r)
 
@@ -248,14 +261,14 @@ if use_example_data or uploaded_file is not None:
                 plot_importance(xgb, max_num_features=50, height=0.8, ax=ax)
                 st.pyplot(fig)
 
-            # model_datetime = str(datetime.now())
-            # model_date = model_datetime[:10]
-            # model_time = model_datetime[11:19]
-            #
-            # if authentication_status:
-            #     db.insert_model(username, filename, model_date, model_time,
-            #                     ss['feature_cols'], ss['label_col'], params, model_metrics)
-            #     st.success('The model results have been saved!')
+            model_datetime = str(datetime.now())
+            model_date = model_datetime[:10]
+            model_time = model_datetime[11:19]
+
+            if authentication_status:
+                db.insert_model(username, filename, model_date, model_time,
+                                ss['feature_cols'], ss['label_col'], params, model_metrics)
+                st.success('The model results have been saved!')
 
     # with main_tab4:
     if data_exploration == '⚡ Modeling History':
@@ -269,7 +282,7 @@ if use_example_data or uploaded_file is not None:
         del model_df['_id']
         del model_df['username']
         st.dataframe(model_df)
-        AgGrid(model_df)
+        # AgGrid(model_df)
         # m_df_t = model_df.T
         # AgGrid(m_df_t)
         # model_list = []
