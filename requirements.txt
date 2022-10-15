@@ -7,3 +7,4 @@ numpy
 matplotlib
 streamlit_option_menu
 streamlit_authenticator==0.1.5
+streamlit-aggrid
