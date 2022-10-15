@@ -257,7 +257,7 @@ if use_example_data or uploaded_file is not None:
 
             with tab3:
                 fig, ax = plt.subplots(figsize=(6, 9))
-                plot_importance(xgb, max_num_features=50, height=0.8, ax=ax)
+                plot_importance(ss['xgb'], max_num_features=50, height=0.8, ax=ax)
                 st.pyplot(fig)
 
             model_datetime = str(datetime.now())
