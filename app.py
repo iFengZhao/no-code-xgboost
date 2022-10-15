@@ -219,6 +219,20 @@ if use_example_data or uploaded_file is not None:
 
             ss['xgb'] = run_xgb()
 
+            model_bar = st.progress(0)
+
+            for percent_complete in range(100):
+                time.sleep(0.1)
+                model_bar.progress(percent_complete + 1)
+
+            st.success('Model runs successfully!')
+
+            model_metrics = {}
+            model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(ss['xgb'], X_test, y_test)
+            fp_r, tp_r, thresholds = roc
+            model_metrics['auc_score'] = metrics.auc(fp_r, tp_r)
+            ss['model_metrics'] = model_metrics
+            ss['fp_r'], ss['tp_r'] = fp_r, tp_r
             model_datetime = str(datetime.now())
             model_date = model_datetime[:10]
             model_time = model_datetime[11:19]
@@ -229,25 +243,14 @@ if use_example_data or uploaded_file is not None:
                 st.success('The model results have been saved!')
 
         if ss['run_model']:
-            _, X_test, _, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
-            model_metrics = {}
-            model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(ss['xgb'], X_test, y_test)
-            fp_r, tp_r, thresholds = roc
-            model_metrics['auc_score'] = metrics.auc(fp_r, tp_r)
-
-            model_bar = st.progress(0)
-
-            for percent_complete in range(100):
-                time.sleep(0.1)
-                model_bar.progress(percent_complete + 1)
-
-            st.success('Model runs successfully!')
-
+            # _, X_test, _, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
+            model_metrics = ss['model_metrics']
+            fp_r, tp_r = ss['fp_r'], ss['tp_r']
             st.subheader('Check the model results')
             tab1, tab2, tab3 = st.tabs(["🔢 Metrics", "ROC Curve", "🎯 Feature Importance Chart"])
 
             with tab1:
-                m_col1, m_col2, m_col3, m_col4, m_col5= st.columns(5)
+                m_col1, m_col2, m_col3, m_col4, m_col5 = st.columns(5)
                 m_col1.metric("AUC", round(model_metrics['auc_score'], 3))
                 m_col2.metric("Precision", round(model_metrics['precision'], 3))
                 m_col3.metric("Recall", round(model_metrics['recall'], 3))
