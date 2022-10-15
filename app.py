@@ -204,6 +204,10 @@ if use_example_data or uploaded_file is not None:
         st.subheader('Click the button below to run the model')
         ss['xgb'] = ss.get('xgb', None)
         ss['run_model'] = ss.get('run_model', False)
+        ss['model_metrics'] = ss.get('model_metrics', None)
+        ss['fp_r'] = ss.get('fp_r', None)
+        ss['tp_r'] = ss.get('tp_r', None)
+
         # run_model = st.button('Run XGBoost 🚀')
         if st.button('Run XGBoost 🚀'):
             ss['run_model'] = True
