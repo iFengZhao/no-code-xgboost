@@ -29,9 +29,9 @@ def get_metrics(model, X_test, y_test):
     # Make predictions
     y_pred = model.predict(X_test)
     try:
-        probab = xgb.decision_function(X_test)
+        probab = model.decision_function(X_test)
     except:
-        probab = xgb.predict_proba(X_test)[:, 1]
+        probab = model.predict_proba(X_test)[:, 1]
 
     precision = precision_score(y_test, y_pred)
     recall = recall_score(y_test, y_pred)
