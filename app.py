@@ -97,10 +97,12 @@ if uploaded_file is not None:
 
 if use_example_data or uploaded_file is not None:
     st.sidebar.subheader('Navigation')
-    navigation_vertical = st.sidebar.radio('go to', ('📊 Data Exploration', '⏳ Parameter Tuning',
-                                                     '🚀 Run Model', '⚡ Modeling History'))
-    navigation_horizontal = st.radio('go to', ('📊 Data Exploration', '⏳ Parameter Tuning',
-                                               '🚀 Run Model', '⚡ Modeling History'), horizontal=True)
+    ss['nav_option'] = ss.get('nav_option', 1)
+    option_list = ['📊 Data Exploration', '⏳ Parameter Tuning', '🚀 Run Model', '⚡ Modeling History']
+    navigation_vertical = st.sidebar.radio('go to', option_list, index=ss['nav_option'])
+    ss['nav_option'] = option_list.index(navigation_vertical)
+    navigation_horizontal = st.radio('Navigation', option_list, horizontal=True, index=ss['nav_option'])
+    ss['nav_option'] = option_list.index(navigation_horizontal)
 
     col_names = df.columns
 
