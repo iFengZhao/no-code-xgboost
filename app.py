@@ -90,21 +90,30 @@ use_example_data = st.checkbox('Use example dataset (Sklearn datasets will be su
 if use_example_data:
     df = load_example_data()
     ss['filename'] = 'credit.csv'
+    col_names = df.columns
 
 if uploaded_file is not None:
     df = load_data(uploaded_file)
     ss['filename'] = uploaded_file.name
+    col_names = df.columns
 
 if use_example_data or uploaded_file is not None:
     st.sidebar.subheader('Navigation')
     ss['nav_option'] = ss.get('nav_option', 1)
     option_list = ['📊 Data Exploration', '⏳ Parameter Tuning', '🚀 Run Model', '⚡ Modeling History']
-    navigation_vertical = st.sidebar.radio('go to', option_list, index=ss['nav_option'])
-    ss['nav_option'] = option_list.index(navigation_vertical)
-    navigation_horizontal = st.radio('Navigation', option_list, horizontal=True, index=ss['nav_option'])
-    ss['nav_option'] = option_list.index(navigation_horizontal)
 
-    col_names = df.columns
+    def on_change_vertical():
+        ss['nav_option'] = option_list.index(navigation_vertical)
+
+    def on_change_horizontal():
+        ss['nav_option'] = option_list.index(navigation_horizontal)
+
+    navigation_vertical = st.sidebar.radio('go to', option_list, index=ss['nav_option'],
+                                           on_change=on_change_vertical)
+
+    navigation_horizontal = st.radio('Navigation', option_list, horizontal=True,
+                                     index=ss['nav_option'], on_change=on_change_horizontal)
+
 
     # st.subheader("Navigation")
     # main_tab1, main_tab2, main_tab3, main_tab4 = st.tabs(['📊 Data Exploration', '⏳ Parameter Tuning', '🚀 Run Model', '⚡ Modeling History'])
