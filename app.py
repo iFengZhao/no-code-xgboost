@@ -85,8 +85,7 @@ st.header('No Code XGBoost')
 st.info('This web app allows the user to run XGBoost models without writing a single line of code.', icon="ℹ")
 
 uploaded_file = st.file_uploader('Upload a CSV file', type="csv", key='file_uploader')
-use_example_data = st.checkbox('Use example dataset')
-st.write('Sklearn datasets will be supported in later development.')
+use_example_data = st.checkbox('Use example dataset (Sklearn datasets will be supported in later development)')
 
 if use_example_data:
     df = load_example_data()
@@ -172,10 +171,10 @@ if use_example_data or uploaded_file is not None:
             st.subheader('Check the training and testing data')
             with st.expander('Click to fold/unfold', expanded=True):
                 X_train_tab, X_test_tab, y_train_tab, y_test_tab = st.tabs(['X_train', 'X_test', 'y_train', 'y_test'])
-                X_train_tab.dataframe(X_train)
-                X_test_tab.dataframe(X_test)
-                y_train_tab.dataframe(y_train)
-                y_test_tab.dataframe(y_test)
+                X_train_tab.dataframe(X_train.head())
+                X_test_tab.dataframe(X_test.head())
+                y_train_tab.dataframe(y_train.head())
+                y_test_tab.dataframe(y_test.head())
 
 
         st.subheader('Specify parameters (optional)')
@@ -252,6 +251,7 @@ if use_example_data or uploaded_file is not None:
 
         if ss['run_model']:
             # _, X_test, _, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
+            st.write(ss['model_metrics'])
             model_metrics = ss['model_metrics']
             fp_r, tp_r = ss['fp_r'], ss['tp_r']
             st.subheader('Check the model results')
