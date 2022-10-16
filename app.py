@@ -103,7 +103,7 @@ if use_example_data or uploaded_file is not None:
     navigation_vertical = st.sidebar.radio('go to', option_list)
 
     # st.subheader("Navigation")
-    main_tab1, main_tab2, main_tab3, main_tab4 = st.tabs(option_list)
+    # main_tab1, main_tab2, main_tab3, main_tab4 = st.tabs(option_list)
     #
     # with main_tab1:
     if navigation_vertical == '📊 Data Exploration':
