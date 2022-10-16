@@ -284,20 +284,22 @@ if use_example_data or uploaded_file is not None:
 
     # with main_tab4:
     if data_exploration == '⚡ Modeling History':
-        st.write('hello')
-        models = db.fetch_all_models(username)
-        # st.write(models)
-        # st.json(models, expanded=False)
-        # st.json(models, expanded=True)
-        model_df = pd.DataFrame(models)
-        # model_df.drop([['_id', 'username']], axis=1, inplace=True)
-        del model_df['_id']
-        del model_df['username']
-        st.dataframe(model_df)
-        # AgGrid(model_df)
-        # m_df_t = model_df.T
-        # AgGrid(m_df_t)
-        # model_list = []
+        if authentication_status:
+            models = db.fetch_all_models(username)
+            # st.write(models)
+            # st.json(models, expanded=False)
+            # st.json(models, expanded=True)
+            model_df = pd.DataFrame(models)
+            # model_df.drop([['_id', 'username']], axis=1, inplace=True)
+            del model_df['_id']
+            del model_df['username']
+            st.dataframe(model_df)
+            # AgGrid(model_df)
+            # m_df_t = model_df.T
+            # AgGrid(m_df_t)
+            # model_list = []
+        else:
+            st.warning('You need to log in to retrieve previous models', icon="⚠️")
 
 
 
