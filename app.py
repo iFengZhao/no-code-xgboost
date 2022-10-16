@@ -97,8 +97,10 @@ if uploaded_file is not None:
 
 if use_example_data or uploaded_file is not None:
     st.sidebar.subheader('Navigation')
-    data_exploration = st.sidebar.radio('go to', ('📊 Data Exploration', '⏳ Parameter Tuning',
-                                                  '🚀 Run Model', '⚡ Modeling History'))
+    navigation_vertical = st.sidebar.radio('go to', ('📊 Data Exploration', '⏳ Parameter Tuning',
+                                                     '🚀 Run Model', '⚡ Modeling History'))
+    navigation_horizontal = st.radio('go to', ('📊 Data Exploration', '⏳ Parameter Tuning',
+                                               '🚀 Run Model', '⚡ Modeling History'), horizontal=True)
 
     col_names = df.columns
 
@@ -106,7 +108,7 @@ if use_example_data or uploaded_file is not None:
     # main_tab1, main_tab2, main_tab3, main_tab4 = st.tabs(['📊 Data Exploration', '⏳ Parameter Tuning', '🚀 Run Model', '⚡ Modeling History'])
     #
     # with main_tab1:
-    if data_exploration == '📊 Data Exploration':
+    if navigation_vertical == '📊 Data Exploration' or navigation_horizontal == '📊 Data Exploration':
         st.subheader('Explore the data')
         with st.expander('Click to show the data'):
             st.dataframe(df)
@@ -117,11 +119,11 @@ if use_example_data or uploaded_file is not None:
         df[col_options] = df[col_options].astype(str)
 
     # with main_tab2:
-    if data_exploration == '⏳ Parameter Tuning':
+    if navigation_vertical == '⏳ Parameter Tuning' or navigation_horizontal == '⏳ Parameter Tuning':
         st.write('Will be implemented shortly using Optuna')
 
     # with main_tab3:
-    if data_exploration == '🚀 Run Model':
+    if navigation_vertical == '🚀 Run Model' or navigation_horizontal == '🚀 Run Model':
         # ss['splitted'] = False
         st.subheader('Prepare training and testing data')
         col_list = list(col_names)
@@ -283,7 +285,7 @@ if use_example_data or uploaded_file is not None:
 
 
     # with main_tab4:
-    if data_exploration == '⚡ Modeling History':
+    if navigation_vertical == '⚡ Modeling History' or navigation_horizontal == '⚡ Modeling History':
         if authentication_status:
             models = db.fetch_all_models(username)
             # st.write(models)
