@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from datetime import datetime
 import time
+import pickle
+import json
 import streamlit as st
 import streamlit_authenticator as stauth
 from streamlit import session_state as ss
@@ -223,7 +225,7 @@ if use_example_data or uploaded_file is not None:
                 xgb.fit(X_train, y_train)
                 return xgb
 
-            ss['xgb'] = run_xgb()
+            xgb = run_xgb()
 
             model_bar = st.progress(0)
 
@@ -234,14 +236,49 @@ if use_example_data or uploaded_file is not None:
             st.success('Model runs successfully!')
 
             model_metrics = {}
-            model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(ss['xgb'], X_test, y_test)
+            model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(xgb, X_test, y_test)
             fp_r, tp_r, thresholds = roc
             model_metrics['auc_score'] = metrics.auc(fp_r, tp_r)
             ss['model_metrics'] = model_metrics
             ss['fp_r'], ss['tp_r'] = fp_r, tp_r
+            ss['xgb'] = xgb
+
             model_datetime = str(datetime.now())
             model_date = model_datetime[:10]
             model_time = model_datetime[11:19]
+
+            pickled_model = pickle.dumps(xgb)
+            pickled_file_name = f'xgboost{model_date}_{model_time}.pkl'
+
+            def get_json_info_file(filename, model_date, model_time, used_features, label_name, params, metrics):
+
+                """Get the model info in json"""
+
+                data = {'filename': filename, 'model_date': model_date, 'model_time': model_time,
+                        'used_features': used_features, 'label_name': label_name, 'params': params, 'metrics': metrics}
+                model_string = json.dumps(data)
+                return model_string
+
+            model_string = get_json_info_file(ss['filename'], model_date, model_time, ss['feature_cols'],
+                                             ss['label_col'], params, model_metrics)
+            json_file_name = f'xgboost{model_date}_{model_time}.json'
+
+            download_col1, download_col2 = st.columns(2)
+
+            with download_col1:
+                st.download_button(
+                    'Download Model',
+                    data=pickled_model,
+                    file_name=pickled_file_name
+                )
+
+            with download_col1:
+                st.download_button(
+                    'Download Model Info as a Json file',
+                    data=model_string,
+                    file_name=json_file_name,
+                    mime='application/json',
+                )
 
             if authentication_status:
                 db.insert_model(username, ss['filename'], model_date, model_time,
