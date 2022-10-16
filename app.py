@@ -247,6 +247,13 @@ if use_example_data or uploaded_file is not None:
             model_date = model_datetime[:10]
             model_time = model_datetime[11:19]
 
+
+            if authentication_status:
+                db.insert_model(username, ss['filename'], model_date, model_time,
+                                ss['feature_cols'], ss['label_col'], params, model_metrics)
+                st.success('The model results have been saved!')
+
+        if ss['run_model']:
             pickled_model = pickle.dumps(xgb)
             pickled_file_name = f'xgboost{model_date}_{model_time}.pkl'
 
@@ -272,22 +279,15 @@ if use_example_data or uploaded_file is not None:
                     file_name=pickled_file_name
                 )
 
-            with download_col1:
+            with download_col2:
                 st.download_button(
                     'Download Model Info as a Json file',
                     data=model_string,
                     file_name=json_file_name,
                     mime='application/json',
                 )
-
-            if authentication_status:
-                db.insert_model(username, ss['filename'], model_date, model_time,
-                                ss['feature_cols'], ss['label_col'], params, model_metrics)
-                st.success('The model results have been saved!')
-
-        if ss['run_model']:
             # _, X_test, _, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
-            st.write(ss['model_metrics'])
+            # st.write(ss['model_metrics'])
             model_metrics = ss['model_metrics']
             fp_r, tp_r = ss['fp_r'], ss['tp_r']
             st.subheader('Check the model results')
