@@ -76,6 +76,7 @@ if authentication_status == None:
 if authentication_status:
     authenticator.logout("Logout", "sidebar")
     if ss['logout']:
+        use_example_data = False
         for key in ss.keys():
             del ss[key]
     st.sidebar.subheader(f"Welcome, {name} 👨‍💻")
