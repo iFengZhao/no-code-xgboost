@@ -236,17 +236,15 @@ if use_example_data or uploaded_file is not None:
             st.write(ss['X_train'].head())
             X_train, X_test, y_train, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
 
-            # @st.experimental_singleton
-            # def run_xgb(X_train, y_train):
-            #     xgb = XGBClassifier(objective="binary:logistic", eval_metric="auc", use_label_encoder=False)
-            #     xgb.set_params(**params)
-            #     xgb.fit(X_train, y_train)
-            #     return xgb
-            #
+            @st.experimental_singleton
+            def run_xgb(X_train, y_train):
+                xgb = XGBClassifier(objective="binary:logistic", eval_metric="auc", use_label_encoder=False)
+                xgb.set_params(**params)
+                xgb.fit(X_train, y_train)
+                return xgb
+
             # xgb = run_xgb(X_train, y_train)
-            xgb = XGBClassifier(objective="binary:logistic", eval_metric="auc", use_label_encoder=False)
-            xgb.set_params(**params)
-            xgb.fit(X_train, y_train)
+            xgb = run_xgb(ss['X_train'], ss['y_train'])
 
             model_bar = st.progress(0)
 
@@ -257,7 +255,8 @@ if use_example_data or uploaded_file is not None:
             st.success('Model runs successfully!')
 
 
-            model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(xgb, X_test, y_test)
+            # model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(xgb, X_test, y_test)
+            model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(xgb, ss['X_test'], ss['y_test'])
             fp_r, tp_r, thresholds = roc
             model_metrics['auc_score'] = metrics.auc(fp_r, tp_r)
             ss['model_metrics'] = model_metrics
