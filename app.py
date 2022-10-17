@@ -146,9 +146,9 @@ if use_example_data or uploaded_file is not None:
         col_list = list(col_names)
         default_label_index = len(col_names)-1
         # ss['split'] = ss.get('split', False)
-        # ss['feature_cols'] = ss.get('feature_cols', col_list)
+        ss['feature_cols'] = ss.get('feature_cols', col_list)
         # ss['label_col'] = ss.get('label_col', None)
-        # ss['label_index'] = ss.get('label_index', default_label_index)
+        ss['label_index'] = ss.get('label_index', default_label_index)
         # ss['seed'] = ss.get('seed', 1024)
         # ss['test_size'] = ss.get('test_size', 0.33)
 
