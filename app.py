@@ -154,7 +154,7 @@ if use_example_data or uploaded_file is not None:
 
         with st.form("split_data_form"):
             # feature_cols, label_index, seed, test_size = split_data()
-            feature_cols = st.multiselect('Exclude features not used in the model by cliking the X', col_names, ss['feature_cols'])
+            feature_cols = st.multiselect('Exclude features not used in the model by clicking the X', col_names, ss['feature_cols'])
 
             p_col1, p_col2, p_col3 = st.columns(3)
             with p_col1:
@@ -182,8 +182,7 @@ if use_example_data or uploaded_file is not None:
                 X = df[ss['feature_cols']]
                 y = df[ss['label_col']]
                 ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test'] = train_test_split(X, y, test_size=ss['test_size'],
-                                                                    random_state=ss['seed'],
-                                                                    stratify=y)
+                                                                                            random_state=ss['seed'], stratify=y)
 
         if ss['X_train'] is not None:
             X_train, X_test, y_train, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
@@ -237,14 +236,17 @@ if use_example_data or uploaded_file is not None:
             st.write(ss['X_train'].head())
             X_train, X_test, y_train, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
 
-            @st.experimental_singleton
-            def run_xgb():
-                xgb = XGBClassifier(objective="binary:logistic", eval_metric="auc", use_label_encoder=False)
-                xgb.set_params(**params)
-                xgb.fit(X_train, y_train)
-                return xgb
-
-            xgb = run_xgb()
+            # @st.experimental_singleton
+            # def run_xgb(X_train, y_train):
+            #     xgb = XGBClassifier(objective="binary:logistic", eval_metric="auc", use_label_encoder=False)
+            #     xgb.set_params(**params)
+            #     xgb.fit(X_train, y_train)
+            #     return xgb
+            #
+            # xgb = run_xgb(X_train, y_train)
+            xgb = XGBClassifier(objective="binary:logistic", eval_metric="auc", use_label_encoder=False)
+            xgb.set_params(**params)
+            xgb.fit(X_train, y_train)
 
             model_bar = st.progress(0)
 
