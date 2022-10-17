@@ -221,7 +221,7 @@ if use_example_data or uploaded_file is not None:
         model_metrics = {}
         if st.button('Run XGBoost 🚀'):
             ss['run_model'] = True
-            st.write(ss['X_train'].head())
+            # st.write(ss['X_train'].head())
             X_train, X_test, y_train, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
 
             @st.experimental_singleton
@@ -324,7 +324,7 @@ if use_example_data or uploaded_file is not None:
     if navigation_vertical == '⚡ Modeling History':
         if authentication_status:
             models = db.fetch_all_models(username)
-            st.write(models[0])
+            # st.write(models[0])
             # st.json(models, expanded=False)
             # st.json(models, expanded=True)
             model_df = pd.DataFrame(models)
