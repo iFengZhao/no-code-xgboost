@@ -324,14 +324,14 @@ if use_example_data or uploaded_file is not None:
 
             with download_col1:
                 st.download_button(
-                    '⬇️Download Model ',
+                    '⬇️ Download Pickled Model ',
                     data=pickled_model,
                     file_name=pickled_file_name
                 )
 
             with download_col2:
                 st.download_button(
-                    '⬇️Download Model Info as a Json file ',
+                    '⬇️ Download Model Info as a Json file ',
                     data=model_string,
                     file_name=json_file_name,
                     mime='application/json',
