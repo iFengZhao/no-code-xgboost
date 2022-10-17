@@ -277,6 +277,7 @@ if use_example_data or uploaded_file is not None:
                 st.success('The model results have been saved!')
 
         if ss['run_model']:
+            model_metrics = ss['model_metrics']
             pickled_model = pickle.dumps(ss['xgb'])
             model_date, model_time = ss['model_date'], ss['model_time']
             pickled_file_name = f'xgboost{model_date}_{model_time}.pkl'
@@ -312,7 +313,7 @@ if use_example_data or uploaded_file is not None:
                 )
             _, X_test, _, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
             st.write(ss['model_metrics'])
-            model_metrics = ss['model_metrics']
+
             fp_r, tp_r = ss['fp_r'], ss['tp_r']
             st.subheader('Check the model results')
             tab1, tab2, tab3 = st.tabs(["🔢 Metrics", "ROC Curve", "🎯 Feature Importance Chart"])
