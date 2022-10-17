@@ -7,6 +7,7 @@ import pickle
 import json
 import streamlit as st
 import streamlit_authenticator as stauth
+from streamlit_option_menu import option_menu
 from streamlit import session_state as ss
 from sklearn import metrics
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
@@ -19,7 +20,7 @@ import database as db
 
 
 # settings
-# st.set_page_config(layout="wide")
+st.set_page_config(layout="wide")
 
 # utility functions
 def get_ohe_col_name(ohe, category_cols, drop='if_binary'):
@@ -81,6 +82,25 @@ def load_example_data():
     return df
 
 
+# navigation option menu
+
+# option_list = ['📊 Data Exploration', '⏳ Parameter Tuning', '🚀 Run Model', '⚡ Modeling History']
+option_list = ['Data Exploration', 'Parameter Tuning', 'Run Model', 'Modeling History']
+
+with st.sidebar:
+    st.header('No Code XGBoost')
+    navigation_vertical = option_menu(
+        menu_title=None,
+        options=option_list,
+        icons=['activity', 'body-text', 'caret-right-square', 'cloud-arrow-down'],  # https://icons.getbootstrap.com/
+        styles={
+            "container": {"padding": "0!important", "background-color": "#fafafa"},
+            "icon": {"color": "orange", "font-size": "15px"},
+            "nav-link": {"font-size": "15px", "text-align": "left", "margin": "0px", "--hover-color": "#eee"},
+            # "nav-link-selected": {"background-color": "green"},
+        }
+    )
+
 # Authentication
 users = db.fetch_all_users()
 usernames = [user['_id'] for user in users]
@@ -101,16 +121,21 @@ if authentication_status == None:
                        "but the model results won't be saved for later retrieval.")
 
 if authentication_status:
+    st.sidebar.subheader(f"Welcome, {name} 👨‍💻")
     authenticator.logout("Logout", "sidebar")
     if ss['logout']:
         use_example_data = False
         for key in ss.keys():
             del ss[key]
-    st.sidebar.subheader(f"Welcome, {name} 👨‍💻")
 
 # Newly defined session states
 ss['filename'] = ss.get('filename', None)
+ss['data'] = ss.get('data', None)
+ss['col_names'] = ss.get('col_names', None)
 ss['split'] = ss.get('split', False)
+ss['use_example_dataset'] = ss.get('use_example_dataset', True)
+# col_list = list(ss['col_names'])
+# default_label_index = len(ss['col_names']) - 1
 # ss['feature_cols'] = ss.get('feature_cols', col_list)
 ss['label_col'] = ss.get('label_col', None)
 # ss['label_index'] = ss.get('label_index', default_label_index)
@@ -129,32 +154,52 @@ ss['model_date'] = ss.get('model_date', None)
 ss['model_time'] = ss.get('model_time', None)
 ss['pickled_model'] = ss.get('pickled_model', None)
 
-st.header('No Code XGBoost')
-st.info('This web app allows the user to run XGBoost models without writing a single line of code.', icon="ℹ")
+ss_list = ['data', 'col_names', 'split', 'use_example_dataset',
+           'feature_cols', 'label_col', 'label_index', 'seed',
+           'test_size', 'X_train', 'X_test', 'y_train', 'y_test',
+           'xgb', 'run_model', 'model_metrics','fp_r', 'tp_r',
+           'model_date', 'model_time', 'pickled_model']
 
-uploaded_file = st.file_uploader('Upload a CSV file', type="csv", key='file_uploader')
-use_example_data = st.checkbox('Use example dataset (Sklearn datasets will be supported in later development)',
-                               value=True)
 
-if use_example_data:
-    data = load_example_data()
-    ss['filename'] = 'credit.csv'
-    col_names = data.columns
+def clear_session_states():
+    """
+    clear session states when needed
+    :return:
+    """
+    for key in ss.keys():
+        if key in ss_list:
+            del ss[key]
 
-if uploaded_file is not None:
-    data = load_data(uploaded_file)
-    ss['filename'] = uploaded_file.name
-    col_names = data.columns
 
-if use_example_data or uploaded_file is not None:
-    st.sidebar.subheader('Navigation')
-    option_list = ['📊 Data Exploration', '⏳ Parameter Tuning', '🚀 Run Model', '⚡ Modeling History']
+# st.header('No Code XGBoost')
+# st.info('This web app allows the user to run XGBoost models without writing a single line of code.', icon="ℹ")
 
-    navigation_vertical = st.sidebar.radio('go to', option_list)
-    df = data.copy()
-    if navigation_vertical == '📊 Data Exploration':
+if navigation_vertical == 'Data Exploration':
+    st.header('📊 Data Exploration')
+    uploaded_file = st.file_uploader('Upload a CSV file', type="csv", key='file_uploader')
+    use_example_data = st.checkbox('Use example dataset (Sklearn datasets will be supported in later development)',
+                                   value=ss['use_example_dataset'])
+    if use_example_data:
+        ss['data'] = load_example_data()
+        ss['filename'] = 'credit.csv'
+        ss['col_names'] = ss['data'].columns
+    else: ss['use_example_dataset'] = False
+
+    if uploaded_file is not None:
+        ss['data'] = load_data(uploaded_file)
+        ss['filename'] = uploaded_file.name
+        ss['col_names'] = ss['data'].columns
+
+    if not use_example_data and uploaded_file is None:
+        ss['data'] = None
+        clear_session_states()
+
+    if use_example_data or uploaded_file is not None:
+        df = ss['data'].copy()
+        col_names = ss['col_names']
         col_options = st.multiselect('Specify the categorical columns', col_names)
         df[col_options] = df[col_options].astype(str)
+        ss['data'] = df
 
         st.subheader('Explore the data')
         with st.expander('Click to show the data'):
@@ -162,10 +207,17 @@ if use_example_data or uploaded_file is not None:
         with st.expander('Click to show the data description'):
             st.dataframe(df.describe())
 
-    if navigation_vertical == '⏳ Parameter Tuning':
-        st.write('Will be implemented shortly using Optuna')
+if navigation_vertical == 'Parameter Tuning':
+    st.header('⏳ Parameter Tuning')
+    st.write('Will be implemented shortly using Optuna')
 
-    if navigation_vertical == '🚀 Run Model':
+if navigation_vertical == 'Run Model':
+    st.header('🚀 Run Model')
+    if ss['data'] is None:
+        st.info('Please upload a dataset or use the example dataset', icon="ℹ️")
+    else:
+        df = ss['data']
+        col_names = ss['col_names']
         st.subheader('Prepare training and testing data')
         col_list = list(col_names)
         default_label_index = len(col_names) - 1
@@ -174,7 +226,8 @@ if use_example_data or uploaded_file is not None:
 
         with st.form("split_data_form"):
             feature_cols = st.multiselect('Exclude features not used in the model by clicking the X',
-                                          col_names, ss['feature_cols'])
+                                          col_names, ss['feature_cols'],
+                                          help='Categorical variables will be one-hot encoded')
 
             p_col1, p_col2, p_col3 = st.columns(3)
             with p_col1:
@@ -336,6 +389,7 @@ if use_example_data or uploaded_file is not None:
                     file_name=json_file_name,
                     mime='application/json',
                 )
+
             _, X_test, _, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
 
             fp_r, tp_r = ss['fp_r'], ss['tp_r']
@@ -365,58 +419,63 @@ if use_example_data or uploaded_file is not None:
                 plot_importance(ss['xgb'], max_num_features=50, height=0.8, ax=ax)
                 st.pyplot(fig2)
 
-    if navigation_vertical == '⚡ Modeling History':
-        if authentication_status:
-            models = db.fetch_all_models(username)
-            # st.write(models[0])
-            # st.json(models, expanded=False)
-            # st.json(models, expanded=True)
-            model_df = pd.DataFrame(models)
-            del model_df['_id']
-            del model_df['username']
+if navigation_vertical == 'Modeling History':
+    st.header('⚡ Modeling History')
+    if authentication_status:
+        models = db.fetch_all_models(username)
 
-            st.markdown('**Here are all the previous models.**')
-            st.dataframe(model_df)
+        model_df = pd.DataFrame(models)
+        del model_df['_id']
+        del model_df['username']
 
-            st.markdown('**Pick a specific model to check out**')
-            filter_col1, filter_col2 = st.columns(2)
+        st.markdown('**Here are all the previous models.**')
+        st.dataframe(model_df)
 
-            with filter_col1:
-                selected_day = st.date_input('which day to choose')
+        st.markdown('**Pick a specific model to check out**')
+        filter_col1, filter_col2 = st.columns(2)
 
-            type(selected_day)
-            time_list = model_df.loc[model_df['model_date'] == str(selected_day), 'model_time']
+        with filter_col1:
+            selected_day = st.date_input('which day to choose')
 
-            default_time_index = len(time_list) - 1
+        type(selected_day)
+        time_list = model_df.loc[model_df['model_date'] == str(selected_day), 'model_time']
 
-            with filter_col2:
-                selected_time = st.selectbox('pick a time', time_list, index=default_time_index)
+        default_time_index = len(time_list) - 1
 
-
-            # filter the model json
-            def get_selected_model(model_day, model_time):
-                selected_model = None
-                for model in models:
-                    if model['model_date'] == model_day and model['model_time'] == model_time:
-                        selected_model = model
-                        break
-                return selected_model
+        with filter_col2:
+            selected_time = st.selectbox('pick a time', time_list, index=default_time_index)
 
 
-            # st.write(models[0]['model_date'])
-            # selected_model = None
-            # for model in models:
-            #     if model['model_date'] == str(selected_day) and model['model_time'] == str(selected_time):
-            #         selected_model = model
-            #         break
-            #
-            selected_model = get_selected_model(str(selected_day), str(selected_time))
-            selected_pickled_model = selected_model['pickled_model']
-            del selected_model['_id']
-            del selected_model['pickled_model']
-            st.write(selected_model)
+        # filter the model json
+        def get_selected_model(model_day, model_time):
+            """
+            Select model from the database
+            :param model_day: selected model day
+            :param model_time: selected model time
+            :return: selected model
+            """
+            selected_model = None
+            for model in models:
+                if model['model_date'] == model_day and model['model_time'] == model_time:
+                    selected_model = model
+                    break
+            return selected_model
 
-            # AgGrid(model_df)
 
-        else:
-            st.warning('You need to log in to retrieve previous models', icon="⚠️")
+        selected_model = get_selected_model(str(selected_day), str(selected_time))
+        selected_pickled_model = selected_model['pickled_model']
+        del selected_model['_id']
+        del selected_model['pickled_model']
+        st.write(selected_model)
+
+        download_file_name = f'xgboost{selected_day}_{selected_time}.pkl'
+        st.download_button(
+            '⬇️ Download Pickled Model ',
+            data=selected_pickled_model,
+            file_name=download_file_name
+        )
+
+        # AgGrid(model_df)
+
+    else:
+        st.warning('You need to log in to retrieve previous models', icon="⚠️")
