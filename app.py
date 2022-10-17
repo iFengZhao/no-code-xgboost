@@ -205,7 +205,7 @@ if use_example_data or uploaded_file is not None:
                 df_cat = pd.DataFrame(ohe.transform(df_cat).toarray(), columns=get_ohe_col_name(ohe, cat_cols))
 
                 none_cat_cols = list(features_df.select_dtypes(exclude='object').columns)
-                df_non_cat = features_df[features_df[none_cat_cols]]
+                df_non_cat = features_df[none_cat_cols]
 
                 # X = df[ss['feature_cols']]
                 X = pd.concat([df_cat, df_non_cat], axis=1)
