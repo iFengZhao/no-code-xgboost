@@ -133,7 +133,7 @@ ss['filename'] = ss.get('filename', None)
 ss['data'] = ss.get('data', None)
 ss['col_names'] = ss.get('col_names', None)
 ss['split'] = ss.get('split', False)
-ss['use_example_dataset'] = ss.get('use_example_dataset', True)
+ss['use_example_dataset'] = ss.get('use_example_dataset', False)
 # col_list = list(ss['col_names'])
 # default_label_index = len(ss['col_names']) - 1
 # ss['feature_cols'] = ss.get('feature_cols', col_list)
@@ -177,7 +177,7 @@ def clear_session_states():
 if navigation_vertical == 'Data Exploration':
     st.header('📊 Data Exploration')
     uploaded_file = st.file_uploader('Upload a CSV file', type="csv", key='file_uploader')
-    use_example_data = st.checkbox('Use example dataset (Sklearn datasets will be supported in later development)',
+    use_example_data = st.checkbox('Use example dataset ()',
                                    value=ss['use_example_dataset'])
     if use_example_data:
         ss['data'] = load_example_data()
@@ -186,6 +186,7 @@ if navigation_vertical == 'Data Exploration':
     else: ss['use_example_dataset'] = False
 
     if uploaded_file is not None:
+        ss['use_example_dataset'] = False
         ss['data'] = load_data(uploaded_file)
         ss['filename'] = uploaded_file.name
         ss['col_names'] = ss['data'].columns
@@ -232,7 +233,7 @@ if navigation_vertical == 'Run Model':
             p_col1, p_col2, p_col3 = st.columns(3)
             with p_col1:
                 label_col = st.selectbox('Select the label variable', col_names, index=ss['label_index'],
-                                         help='One-hot encoding will be don on categorical variables')
+                                         help='Select the label variables')
                 label_index = col_list.index(label_col)
             with p_col2:
                 seed = st.number_input('seed', value=ss['seed'],
