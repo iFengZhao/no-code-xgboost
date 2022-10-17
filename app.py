@@ -12,14 +12,38 @@ from sklearn import metrics
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from sklearn.metrics import roc_curve
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.datasets import load_breast_cancer
 from xgboost import XGBClassifier, plot_importance
 import database as db
+
 
 # settings
 # st.set_page_config(layout="wide")
 
 # utility functions
+def get_ohe_col_name(ohe, category_cols, drop='if_binary'):
+    """
+    Get col names after one hot encoding
+
+    :param ohe: OneHotEncoder transforer
+    :param category_cols: categorical columns that need to be encoded
+    :param drop: whether encode binary cols
+    """
+
+    cat_cols_new = []
+    col_values = ohe.categories_
+
+    for i, j in enumerate(category_cols):
+        if (drop == 'if_binary') and (len(col_values[i]) == 2):
+            cat_cols_new.append(j)
+        else:
+            for v in col_values[i]:
+                feature_name = j + '_' + str(v)
+                cat_cols_new.append(feature_name)
+    return cat_cols_new
+
+
 def get_metrics(model, X_test, y_test):
     """
     Pass model and testing set to get metrics
@@ -43,11 +67,13 @@ def get_metrics(model, X_test, y_test):
 
     return precision, recall, f1, accuracy, roc
 
+
 # Cached data
 @st.experimental_memo
 def load_data(file):
     df = pd.read_csv(file, encoding='utf-8')
     return df
+
 
 @st.experimental_memo
 def load_example_data():
@@ -107,33 +133,34 @@ st.header('No Code XGBoost')
 st.info('This web app allows the user to run XGBoost models without writing a single line of code.', icon="ℹ")
 
 uploaded_file = st.file_uploader('Upload a CSV file', type="csv", key='file_uploader')
-use_example_data = st.checkbox('Use example dataset (Sklearn datasets will be supported in later development)')
+use_example_data = st.checkbox('Use example dataset (Sklearn datasets will be supported in later development)',
+                               value=True)
 
 if use_example_data:
-    df = load_example_data()
+    data = load_example_data()
     ss['filename'] = 'credit.csv'
-    col_names = df.columns
+    col_names = data.columns
 
 if uploaded_file is not None:
-    df = load_data(uploaded_file)
+    data = load_data(uploaded_file)
     ss['filename'] = uploaded_file.name
-    col_names = df.columns
+    col_names = data.columns
 
 if use_example_data or uploaded_file is not None:
     st.sidebar.subheader('Navigation')
     option_list = ['📊 Data Exploration', '⏳ Parameter Tuning', '🚀 Run Model', '⚡ Modeling History']
 
     navigation_vertical = st.sidebar.radio('go to', option_list)
-
+    df = data.copy()
     if navigation_vertical == '📊 Data Exploration':
+        col_options = st.multiselect('Specify the categorical columns', col_names)
+        df[col_options] = df[col_options].astype(str)
+
         st.subheader('Explore the data')
         with st.expander('Click to show the data'):
             st.dataframe(df)
         with st.expander('Click to show the data description'):
             st.dataframe(df.describe())
-
-        col_options = st.multiselect('Specify the categorical columns', col_names)
-        df[col_options] = df[col_options].astype(str)
 
     if navigation_vertical == '⏳ Parameter Tuning':
         st.write('Will be implemented shortly using Optuna')
@@ -141,7 +168,7 @@ if use_example_data or uploaded_file is not None:
     if navigation_vertical == '🚀 Run Model':
         st.subheader('Prepare training and testing data')
         col_list = list(col_names)
-        default_label_index = len(col_names)-1
+        default_label_index = len(col_names) - 1
         ss['feature_cols'] = ss.get('feature_cols', col_list)
         ss['label_index'] = ss.get('label_index', default_label_index)
 
@@ -151,7 +178,8 @@ if use_example_data or uploaded_file is not None:
 
             p_col1, p_col2, p_col3 = st.columns(3)
             with p_col1:
-                label_col = st.selectbox('Select the label variable', col_names, index=ss['label_index'])
+                label_col = st.selectbox('Select the label variable', col_names, index=ss['label_index'],
+                                         help='One-hot encoding will be don on categorical variables')
                 label_index = col_list.index(label_col)
             with p_col2:
                 seed = st.number_input('seed', value=ss['seed'],
@@ -168,10 +196,24 @@ if use_example_data or uploaded_file is not None:
                 ss['seed'] = seed
                 ss['test_size'] = test_size
 
-                X = df[ss['feature_cols']]
+                features_df = df[ss['feature_cols']]
+                cat_cols = list(features_df.select_dtypes(include='object').columns)
+                ohe = OneHotEncoder(drop='if_binary')
+                df_cat = df[cat_cols]
+                ohe.fit(df_cat)
+
+                df_cat = pd.DataFrame(ohe.transform(df_cat).toarray(), columns=get_ohe_col_name(ohe, cat_cols))
+
+                none_cat_cols = list(features_df.select_dtypes(exclude='object').columns)
+                df_non_cat = features_df[features_df[none_cat_cols]]
+
+                # X = df[ss['feature_cols']]
+                X = pd.concat([df_cat, df_non_cat], axis=1)
                 y = df[ss['label_col']]
-                ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test'] = train_test_split(X, y, test_size=ss['test_size'],
-                                                                                            random_state=ss['seed'], stratify=y)
+                ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test'] = train_test_split(X, y,
+                                                                                            test_size=ss['test_size'],
+                                                                                            random_state=ss['seed'],
+                                                                                            stratify=y)
 
         if ss['X_train'] is not None:
             X_train, X_test, y_train, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
@@ -182,7 +224,6 @@ if use_example_data or uploaded_file is not None:
                 X_test_tab.dataframe(X_test.head())
                 y_train_tab.dataframe(y_train.head())
                 y_test_tab.dataframe(y_test.head())
-
 
         st.subheader('Specify parameters (optional)')
         with st.expander('Click to fold/unfold', expanded=True):
@@ -224,6 +265,7 @@ if use_example_data or uploaded_file is not None:
             # st.write(ss['X_train'].head())
             X_train, X_test, y_train, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
 
+
             @st.experimental_singleton
             def run_xgb(X_train, y_train, params):
                 xgb = XGBClassifier(objective="binary:logistic", eval_metric="auc", use_label_encoder=False)
@@ -232,11 +274,13 @@ if use_example_data or uploaded_file is not None:
 
                 return xgb
 
+
             xgb = run_xgb(X_train, y_train, params)
 
             st.success('Model runs successfully!')
 
-            model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(xgb, X_test, y_test)
+            model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics[
+                'accuracy'], roc = get_metrics(xgb, X_test, y_test)
             fp_r, tp_r, thresholds = roc
             model_metrics['auc_score'] = metrics.auc(fp_r, tp_r)
             ss['model_metrics'] = model_metrics
@@ -262,14 +306,15 @@ if use_example_data or uploaded_file is not None:
             model_date, model_time = ss['model_date'], ss['model_time']
             pickled_file_name = f'xgboost{model_date}_{model_time}.pkl'
 
-            def get_json_info_file(filename, model_date, model_time, used_features, label_name, params, metrics):
 
+            def get_json_info_file(filename, model_date, model_time, used_features, label_name, params, metrics):
                 """Get the model info in json"""
 
                 data = {'filename': filename, 'model_date': model_date, 'model_time': model_time,
                         'used_features': used_features, 'label_name': label_name, 'params': params, 'metrics': metrics}
                 model_string = json.dumps(data)
                 return model_string
+
 
             model_string = get_json_info_file(ss['filename'], model_date, model_time, ss['feature_cols'],
                                               ss['label_col'], params, model_metrics)
@@ -320,7 +365,6 @@ if use_example_data or uploaded_file is not None:
                 plot_importance(ss['xgb'], max_num_features=50, height=0.8, ax=ax)
                 st.pyplot(fig2)
 
-
     if navigation_vertical == '⚡ Modeling History':
         if authentication_status:
             models = db.fetch_all_models(username)
@@ -348,6 +392,7 @@ if use_example_data or uploaded_file is not None:
             with filter_col2:
                 selected_time = st.selectbox('pick a time', time_list, index=default_time_index)
 
+
             # filter the model json
             def get_selected_model(model_day, model_time):
                 selected_model = None
@@ -356,6 +401,8 @@ if use_example_data or uploaded_file is not None:
                         selected_model = model
                         break
                 return selected_model
+
+
             # st.write(models[0]['model_date'])
             # selected_model = None
             # for model in models:
@@ -373,10 +420,3 @@ if use_example_data or uploaded_file is not None:
 
         else:
             st.warning('You need to log in to retrieve previous models', icon="⚠️")
-
-
-
-
-
-
-
