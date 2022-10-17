@@ -101,6 +101,7 @@ ss['fp_r'] = ss.get('fp_r', None)
 ss['tp_r'] = ss.get('tp_r', None)
 ss['model_date'] = ss.get('model_date', None)
 ss['model_time'] = ss.get('model_time', None)
+ss['pickled_model'] = ss.get('pickled_model', None)
 
 st.header('No Code XGBoost')
 st.info('This web app allows the user to run XGBoost models without writing a single line of code.', icon="ℹ")
@@ -242,6 +243,8 @@ if use_example_data or uploaded_file is not None:
             ss['model_metrics'] = model_metrics
             ss['fp_r'], ss['tp_r'] = fp_r, tp_r
             ss['xgb'] = xgb
+            pickled_model = pickle.dumps(xgb)
+            ss['pickled_model'] = pickled_model
 
             model_datetime = str(datetime.now())
             model_date = model_datetime[:10]
@@ -250,13 +253,13 @@ if use_example_data or uploaded_file is not None:
             ss['model_time'] = model_time
 
             if authentication_status:
-                db.insert_model(username, ss['filename'], model_date, model_time,
+                db.insert_model(username, ss['filename'], pickled_model, model_date, model_time,
                                 ss['feature_cols'], ss['label_col'], params, model_metrics)
                 st.success('The model results have been saved!')
 
         if ss['run_model']:
             model_metrics = ss['model_metrics']
-            pickled_model = pickle.dumps(ss['xgb'])
+            pickled_model = ss['pickled_model']
             model_date, model_time = ss['model_date'], ss['model_time']
             pickled_file_name = f'xgboost{model_date}_{model_time}.pkl'
 
@@ -290,7 +293,6 @@ if use_example_data or uploaded_file is not None:
                     mime='application/json',
                 )
             _, X_test, _, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
-            st.write(ss['model_metrics'])
 
             fp_r, tp_r = ss['fp_r'], ss['tp_r']
             st.subheader('Check the model results')
@@ -327,10 +329,19 @@ if use_example_data or uploaded_file is not None:
             # st.json(models, expanded=False)
             # st.json(models, expanded=True)
             model_df = pd.DataFrame(models)
-
             del model_df['_id']
             del model_df['username']
             st.dataframe(model_df)
+
+            # st.markdown('Pick a specific model to check out')
+            # filter_col1, filter_col2 = st.columns(2)
+            #
+            # with filter_col1:
+            #     selected_day = st.date_input('which day to choose')
+            #     selected_models =
+            # with filter_col1:
+            #     selected_day = st.date_input('which day to choose')
+
             # AgGrid(model_df)
 
         else:
