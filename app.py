@@ -82,6 +82,24 @@ if authentication_status:
             del ss[key]
     st.sidebar.subheader(f"Welcome, {name} 👨‍💻")
 
+# All newly defined session states
+ss['filename'] = ss.get('filename', None)
+ss['split'] = ss.get('split', False)
+# ss['feature_cols'] = ss.get('feature_cols', col_list)
+ss['label_col'] = ss.get('label_col', None)
+# ss['label_index'] = ss.get('label_index', default_label_index)
+ss['seed'] = ss.get('seed', 1024)
+ss['test_size'] = ss.get('test_size', 0.33)
+ss['X_train'] = ss.get('X_train', None)
+ss['X_test'] = ss.get('X_test', None)
+ss['y_train'] = ss.get('y_train', None)
+ss['y_test'] = ss.get('y_test', None)
+ss['xgb'] = ss.get('xgb', None)
+ss['run_model'] = ss.get('run_model', False)
+ss['model_metrics'] = ss.get('model_metrics', None)
+ss['fp_r'] = ss.get('fp_r', None)
+ss['tp_r'] = ss.get('tp_r', None)
+
 st.header('No Code XGBoost')
 st.info('This web app allows the user to run XGBoost models without writing a single line of code.', icon="ℹ")
 
@@ -127,12 +145,12 @@ if use_example_data or uploaded_file is not None:
         st.subheader('Prepare training and testing data')
         col_list = list(col_names)
         default_label_index = len(col_names)-1
-        ss['split'] = ss.get('split', False)
-        ss['feature_cols'] = ss.get('feature_cols', col_list)
-        ss['label_col'] = ss.get('label_col', None)
-        ss['label_index'] = ss.get('label_index', default_label_index)
-        ss['seed'] = ss.get('seed', 1024)
-        ss['test_size'] = ss.get('test_size', 0.33)
+        # ss['split'] = ss.get('split', False)
+        # ss['feature_cols'] = ss.get('feature_cols', col_list)
+        # ss['label_col'] = ss.get('label_col', None)
+        # ss['label_index'] = ss.get('label_index', default_label_index)
+        # ss['seed'] = ss.get('seed', 1024)
+        # ss['test_size'] = ss.get('test_size', 0.33)
 
         with st.form("split_data_form"):
             # feature_cols, label_index, seed, test_size = split_data()
@@ -147,10 +165,10 @@ if use_example_data or uploaded_file is not None:
             with p_col3:
                 test_size = st.number_input('test_size', min_value=0.0, max_value=1.0, value=ss['test_size'])
 
-            ss['X_train'] = ss.get('X_train', None)
-            ss['X_test'] = ss.get('X_test', None)
-            ss['y_train'] = ss.get('y_train', None)
-            ss['y_test'] = ss.get('y_test', None)
+            # ss['X_train'] = ss.get('X_train', None)
+            # ss['X_test'] = ss.get('X_test', None)
+            # ss['y_train'] = ss.get('y_train', None)
+            # ss['y_test'] = ss.get('y_test', None)
 
             split_button = st.form_submit_button("Split the data")
             if split_button:
@@ -206,13 +224,14 @@ if use_example_data or uploaded_file is not None:
                 params
 
         st.subheader('Click the button below to run the model')
-        ss['xgb'] = ss.get('xgb', None)
-        ss['run_model'] = ss.get('run_model', False)
-        ss['model_metrics'] = ss.get('model_metrics', None)
-        ss['fp_r'] = ss.get('fp_r', None)
-        ss['tp_r'] = ss.get('tp_r', None)
+        # ss['xgb'] = ss.get('xgb', None)
+        # ss['run_model'] = ss.get('run_model', False)
+        # ss['model_metrics'] = ss.get('model_metrics', None)
+        # ss['fp_r'] = ss.get('fp_r', None)
+        # ss['tp_r'] = ss.get('tp_r', None)
 
         # run_model = st.button('Run XGBoost 🚀')
+        model_metrics = {}
         if st.button('Run XGBoost 🚀'):
             ss['run_model'] = True
             st.write(ss['X_train'].head())
@@ -235,7 +254,7 @@ if use_example_data or uploaded_file is not None:
 
             st.success('Model runs successfully!')
 
-            model_metrics = {}
+
             model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(xgb, X_test, y_test)
             fp_r, tp_r, thresholds = roc
             model_metrics['auc_score'] = metrics.auc(fp_r, tp_r)
@@ -254,38 +273,38 @@ if use_example_data or uploaded_file is not None:
                 st.success('The model results have been saved!')
 
         if ss['run_model']:
-            pickled_model = pickle.dumps(xgb)
-            pickled_file_name = f'xgboost{model_date}_{model_time}.pkl'
-
-            def get_json_info_file(filename, model_date, model_time, used_features, label_name, params, metrics):
-
-                """Get the model info in json"""
-
-                data = {'filename': filename, 'model_date': model_date, 'model_time': model_time,
-                        'used_features': used_features, 'label_name': label_name, 'params': params, 'metrics': metrics}
-                model_string = json.dumps(data)
-                return model_string
-
-            model_string = get_json_info_file(ss['filename'], model_date, model_time, ss['feature_cols'],
-                                             ss['label_col'], params, model_metrics)
-            json_file_name = f'xgboost{model_date}_{model_time}.json'
-
-            download_col1, download_col2 = st.columns(2)
-
-            with download_col1:
-                st.download_button(
-                    'Download Model',
-                    data=pickled_model,
-                    file_name=pickled_file_name
-                )
-
-            with download_col2:
-                st.download_button(
-                    'Download Model Info as a Json file',
-                    data=model_string,
-                    file_name=json_file_name,
-                    mime='application/json',
-                )
+            # pickled_model = pickle.dumps(xgb)
+            # pickled_file_name = f'xgboost{model_date}_{model_time}.pkl'
+            #
+            # def get_json_info_file(filename, model_date, model_time, used_features, label_name, params, metrics):
+            #
+            #     """Get the model info in json"""
+            #
+            #     data = {'filename': filename, 'model_date': model_date, 'model_time': model_time,
+            #             'used_features': used_features, 'label_name': label_name, 'params': params, 'metrics': metrics}
+            #     model_string = json.dumps(data)
+            #     return model_string
+            #
+            # model_string = get_json_info_file(ss['filename'], model_date, model_time, ss['feature_cols'],
+            #                                  ss['label_col'], params, model_metrics)
+            # json_file_name = f'xgboost{model_date}_{model_time}.json'
+            #
+            # download_col1, download_col2 = st.columns(2)
+            #
+            # with download_col1:
+            #     st.download_button(
+            #         'Download Model',
+            #         data=pickled_model,
+            #         file_name=pickled_file_name
+            #     )
+            #
+            # with download_col2:
+            #     st.download_button(
+            #         'Download Model Info as a Json file',
+            #         data=model_string,
+            #         file_name=json_file_name,
+            #         mime='application/json',
+            #     )
             # _, X_test, _, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
             # st.write(ss['model_metrics'])
             model_metrics = ss['model_metrics']
