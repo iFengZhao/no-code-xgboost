@@ -82,7 +82,7 @@ if authentication_status:
             del ss[key]
     st.sidebar.subheader(f"Welcome, {name} 👨‍💻")
 
-# All newly defined session states
+# Newly defined session states
 ss['filename'] = ss.get('filename', None)
 ss['split'] = ss.get('split', False)
 # ss['feature_cols'] = ss.get('feature_cols', col_list)
@@ -124,53 +124,39 @@ if use_example_data or uploaded_file is not None:
 
     navigation_vertical = st.sidebar.radio('go to', option_list)
 
-    # st.subheader("Navigation")
-    # main_tab1, main_tab2, main_tab3, main_tab4 = st.tabs(option_list)
-    #
-    # with main_tab1:
     if navigation_vertical == '📊 Data Exploration':
         st.subheader('Explore the data')
         with st.expander('Click to show the data'):
             st.dataframe(df)
-        # with st.expander('Click to show the data description'):
-        #     st.dataframe(df.describe(include='all'))
+        with st.expander('Click to show the data description'):
+            st.dataframe(df.describe())
 
         col_options = st.multiselect('Specify the categorical columns', col_names)
         df[col_options] = df[col_options].astype(str)
 
-    # with main_tab2:
     if navigation_vertical == '⏳ Parameter Tuning':
         st.write('Will be implemented shortly using Optuna')
 
-    # with main_tab3:
     if navigation_vertical == '🚀 Run Model':
         st.subheader('Prepare training and testing data')
         col_list = list(col_names)
         default_label_index = len(col_names)-1
-        # ss['split'] = ss.get('split', False)
         ss['feature_cols'] = ss.get('feature_cols', col_list)
-        # ss['label_col'] = ss.get('label_col', None)
         ss['label_index'] = ss.get('label_index', default_label_index)
-        # ss['seed'] = ss.get('seed', 1024)
-        # ss['test_size'] = ss.get('test_size', 0.33)
 
         with st.form("split_data_form"):
-            # feature_cols, label_index, seed, test_size = split_data()
-            feature_cols = st.multiselect('Exclude features not used in the model by clicking the X', col_names, ss['feature_cols'])
+            feature_cols = st.multiselect('Exclude features not used in the model by clicking the X',
+                                          col_names, ss['feature_cols'])
 
             p_col1, p_col2, p_col3 = st.columns(3)
             with p_col1:
-                label_col = st.selectbox('Select the lable variable', col_names, index=ss['label_index'])
+                label_col = st.selectbox('Select the label variable', col_names, index=ss['label_index'])
                 label_index = col_list.index(label_col)
             with p_col2:
-                seed = st.number_input('seed', value=ss['seed'], help='The random seed help you reproduce the dataset later.')
+                seed = st.number_input('seed', value=ss['seed'],
+                                       help='The random seed help you reproduce the dataset later.')
             with p_col3:
                 test_size = st.number_input('test_size', min_value=0.0, max_value=1.0, value=ss['test_size'])
-
-            # ss['X_train'] = ss.get('X_train', None)
-            # ss['X_test'] = ss.get('X_test', None)
-            # ss['y_train'] = ss.get('y_train', None)
-            # ss['y_test'] = ss.get('y_test', None)
 
             split_button = st.form_submit_button("Split the data")
             if split_button:
@@ -198,31 +184,31 @@ if use_example_data or uploaded_file is not None:
 
 
         st.subheader('Specify parameters (optional)')
-        # with st.expander('Click to fold/unfold', expanded=True):
-        with st.form("params_form"):
-            col1, col2, col3, col4 = st.columns(4)
+        with st.expander('Click to fold/unfold', expanded=True):
+            with st.form("params_form"):
+                col1, col2, col3, col4 = st.columns(4)
 
-            params = {}
-            with col1:
-                params['alpha'] = st.number_input('alpha', value=0)
-                params['lambda'] = st.number_input('lambda', value=1)
+                params = {}
+                with col1:
+                    params['alpha'] = st.number_input('alpha', value=0)
+                    params['lambda'] = st.number_input('lambda', value=1)
 
-            with col2:
-                params['eta'] = st.number_input('eta', min_value=0.0, max_value=1.0, value=0.3)
-                params['gamma'] = st.number_input('gamma', min_value=0, value=0)
+                with col2:
+                    params['eta'] = st.number_input('eta', min_value=0.0, max_value=1.0, value=0.3)
+                    params['gamma'] = st.number_input('gamma', min_value=0, value=0)
 
-            with col3:
-                params['max_depth'] = st.number_input('max_depth', min_value=0, value=6)
-                params['min_child_weight'] = st.number_input('min_child_weight', min_value=0, value=1)
+                with col3:
+                    params['max_depth'] = st.number_input('max_depth', min_value=0, value=6)
+                    params['min_child_weight'] = st.number_input('min_child_weight', min_value=0, value=1)
 
-            with col4:
-                params['scale_pos_weight'] = st.number_input('scale_pos_weight', value=1)
-                params['grow_policy'] = st.selectbox('grow_policy', ['depthwise', 'lossguide'])
+                with col4:
+                    params['scale_pos_weight'] = st.number_input('scale_pos_weight', value=1)
+                    params['grow_policy'] = st.selectbox('grow_policy', ['depthwise', 'lossguide'])
 
-            param_button = st.form_submit_button("Done")
-            if param_button:
-                st.markdown('**Here are the parameters you specified:**')
-                params
+                param_button = st.form_submit_button("Done")
+                if param_button:
+                    st.markdown('**Here are the parameters you specified:**')
+                    params
 
         st.subheader('Click the button below to run the model')
         # ss['xgb'] = ss.get('xgb', None)
@@ -231,7 +217,7 @@ if use_example_data or uploaded_file is not None:
         # ss['fp_r'] = ss.get('fp_r', None)
         # ss['tp_r'] = ss.get('tp_r', None)
 
-        # run_model = st.button('Run XGBoost 🚀')
+
         model_metrics = {}
         if st.button('Run XGBoost 🚀'):
             ss['run_model'] = True
@@ -239,27 +225,18 @@ if use_example_data or uploaded_file is not None:
             X_train, X_test, y_train, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
 
             @st.experimental_singleton
-            def run_xgb(X_train, y_train):
+            def run_xgb(X_train, y_train, params):
                 xgb = XGBClassifier(objective="binary:logistic", eval_metric="auc", use_label_encoder=False)
                 xgb.set_params(**params)
                 xgb.fit(X_train, y_train)
 
                 return xgb
 
-            # xgb = run_xgb(X_train, y_train)
+            xgb = run_xgb(X_train, y_train, params)
 
-
-            model_bar = st.progress(0)
-            xgb = run_xgb(ss['X_train'], ss['y_train'])
-            # for percent_complete in range(100):
-            #     time.sleep(0.1)
-            #     model_bar.progress(percent_complete + 1)
-            model_bar.progress(100)
             st.success('Model runs successfully!')
 
-
-            # model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(xgb, X_test, y_test)
-            model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(xgb, ss['X_test'], ss['y_test'])
+            model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(xgb, X_test, y_test)
             fp_r, tp_r, thresholds = roc
             model_metrics['auc_score'] = metrics.auc(fp_r, tp_r)
             ss['model_metrics'] = model_metrics
@@ -343,7 +320,6 @@ if use_example_data or uploaded_file is not None:
                 st.pyplot(fig)
 
 
-    # with main_tab4:
     if navigation_vertical == '⚡ Modeling History':
         if authentication_status:
             models = db.fetch_all_models(username)
@@ -351,14 +327,12 @@ if use_example_data or uploaded_file is not None:
             # st.json(models, expanded=False)
             # st.json(models, expanded=True)
             model_df = pd.DataFrame(models)
-            # model_df.drop([['_id', 'username']], axis=1, inplace=True)
+
             del model_df['_id']
             del model_df['username']
             st.dataframe(model_df)
             # AgGrid(model_df)
-            # m_df_t = model_df.T
-            # AgGrid(m_df_t)
-            # model_list = []
+
         else:
             st.warning('You need to log in to retrieve previous models', icon="⚠️")
 
