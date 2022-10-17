@@ -259,39 +259,39 @@ if use_example_data or uploaded_file is not None:
 
         if ss['run_model']:
             model_metrics = ss['model_metrics']
-            # pickled_model = ss['pickled_model']
-            # model_date, model_time = ss['model_date'], ss['model_time']
-            # pickled_file_name = f'xgboost{model_date}_{model_time}.pkl'
-            #
-            # def get_json_info_file(filename, model_date, model_time, used_features, label_name, params, metrics):
-            #
-            #     """Get the model info in json"""
-            #
-            #     data = {'filename': filename, 'model_date': model_date, 'model_time': model_time,
-            #             'used_features': used_features, 'label_name': label_name, 'params': params, 'metrics': metrics}
-            #     model_string = json.dumps(data)
-            #     return model_string
-            #
-            # model_string = get_json_info_file(ss['filename'], model_date, model_time, ss['feature_cols'],
-            #                                   ss['label_col'], params, model_metrics)
-            # json_file_name = f'xgboost{model_date}_{model_time}.json'
-            #
-            # download_col1, download_col2 = st.columns(2)
-            #
-            # with download_col1:
-            #     st.download_button(
-            #         'Download Model',
-            #         data=pickled_model,
-            #         file_name=pickled_file_name
-            #     )
-            #
-            # with download_col2:
-            #     st.download_button(
-            #         'Download Model Info as a Json file',
-            #         data=model_string,
-            #         file_name=json_file_name,
-            #         mime='application/json',
-            #     )
+            pickled_model = ss['pickled_model']
+            model_date, model_time = ss['model_date'], ss['model_time']
+            pickled_file_name = f'xgboost{model_date}_{model_time}.pkl'
+
+            def get_json_info_file(filename, model_date, model_time, used_features, label_name, params, metrics):
+
+                """Get the model info in json"""
+
+                data = {'filename': filename, 'model_date': model_date, 'model_time': model_time,
+                        'used_features': used_features, 'label_name': label_name, 'params': params, 'metrics': metrics}
+                model_string = json.dumps(data)
+                return model_string
+
+            model_string = get_json_info_file(ss['filename'], model_date, model_time, ss['feature_cols'],
+                                              ss['label_col'], params, model_metrics)
+            json_file_name = f'xgboost{model_date}_{model_time}.json'
+
+            download_col1, download_col2 = st.columns(2)
+
+            with download_col1:
+                st.download_button(
+                    'Download Model',
+                    data=pickled_model,
+                    file_name=pickled_file_name
+                )
+
+            with download_col2:
+                st.download_button(
+                    'Download Model Info as a Json file',
+                    data=model_string,
+                    file_name=json_file_name,
+                    mime='application/json',
+                )
             _, X_test, _, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
 
             fp_r, tp_r = ss['fp_r'], ss['tp_r']
@@ -307,19 +307,19 @@ if use_example_data or uploaded_file is not None:
                 m_col5.metric("Accuracy", round(model_metrics['accuracy'], 3))
 
             with tab2:
-                fig = plt.figure(figsize=(8, 6))
+                fig1 = plt.figure(figsize=(8, 6))
                 plt.plot(fp_r, tp_r, label="AUC = %.3f" % model_metrics['auc_score'])
                 plt.plot([0, 1], [0, 1], "r--")
                 plt.ylabel("TP rate")
                 plt.xlabel("FP rate")
                 plt.legend(loc=4)
                 plt.title("ROC Curve")
-                st.pyplot(fig)
+                st.pyplot(fig1)
 
             with tab3:
-                fig, ax = plt.subplots(figsize=(6, 9))
+                fig2, ax = plt.subplots(figsize=(6, 9))
                 plot_importance(ss['xgb'], max_num_features=50, height=0.8, ax=ax)
-                st.pyplot(fig)
+                st.pyplot(fig2)
 
 
     if navigation_vertical == '⚡ Modeling History':
