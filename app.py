@@ -17,7 +17,7 @@ from xgboost import XGBClassifier, plot_importance
 import database as db
 
 # settings
-st.set_page_config(layout="wide")
+# st.set_page_config(layout="wide")
 
 # utility functions
 def get_metrics(model, X_test, y_test):
@@ -218,7 +218,6 @@ if use_example_data or uploaded_file is not None:
         # ss['fp_r'] = ss.get('fp_r', None)
         # ss['tp_r'] = ss.get('tp_r', None)
 
-
         model_metrics = {}
         if st.button('Run XGBoost 🚀'):
             ss['run_model'] = True
@@ -296,7 +295,7 @@ if use_example_data or uploaded_file is not None:
 
             fp_r, tp_r = ss['fp_r'], ss['tp_r']
             st.subheader('Check the model results')
-            tab1, tab2, tab3 = st.tabs(["🔢 Metrics", "ROC Curve", "🎯 Feature Importance Chart"])
+            tab1, tab2, tab3 = st.tabs(["🔢 Metrics", "⭐ ROC Curve", "🎯 Feature Importance Chart"])
 
             with tab1:
                 m_col1, m_col2, m_col3, m_col4, m_col5 = st.columns(5)
@@ -325,22 +324,50 @@ if use_example_data or uploaded_file is not None:
     if navigation_vertical == '⚡ Modeling History':
         if authentication_status:
             models = db.fetch_all_models(username)
-            # st.write(models)
+            st.write(models[0])
             # st.json(models, expanded=False)
             # st.json(models, expanded=True)
             model_df = pd.DataFrame(models)
             del model_df['_id']
             del model_df['username']
+
+            st.markdown('**Here are all the previous models.**')
             st.dataframe(model_df)
 
-            # st.markdown('Pick a specific model to check out')
-            # filter_col1, filter_col2 = st.columns(2)
+            st.markdown('**Pick a specific model to check out**')
+            filter_col1, filter_col2 = st.columns(2)
+
+            with filter_col1:
+                selected_day = st.date_input('which day to choose')
+
+            type(selected_day)
+            time_list = model_df.loc[model_df['model_date'] == str(selected_day), 'model_time']
+
+            default_time_index = len(time_list) - 1
+
+            with filter_col2:
+                selected_time = st.selectbox('pick a time', time_list, index=default_time_index)
+
+            # filter the model json
+            def get_selected_model(model_day, model_time):
+                selected_model = None
+                for model in models:
+                    if model['model_date'] == model_day and model['model_time'] == model_time:
+                        selected_model = model
+                        break
+                return selected_model
+            # st.write(models[0]['model_date'])
+            # selected_model = None
+            # for model in models:
+            #     if model['model_date'] == str(selected_day) and model['model_time'] == str(selected_time):
+            #         selected_model = model
+            #         break
             #
-            # with filter_col1:
-            #     selected_day = st.date_input('which day to choose')
-            #     selected_models =
-            # with filter_col1:
-            #     selected_day = st.date_input('which day to choose')
+            selected_model = get_selected_model(str(selected_day), str(selected_time))
+            selected_pickled_model = selected_model['pickled_model']
+            del selected_model['_id']
+            del selected_model['pickled_model']
+            st.write(selected_model)
 
             # AgGrid(model_df)
 
