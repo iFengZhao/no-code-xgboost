@@ -20,7 +20,7 @@ import database as db
 
 
 # settings
-st.set_page_config(layout="wide")
+# st.set_page_config(layout="wide")
 
 # utility functions
 def get_ohe_col_name(ohe, category_cols, drop='if_binary'):
@@ -88,14 +88,17 @@ def load_example_data():
 option_list = ['Data Exploration', 'Parameter Tuning', 'Run Model', 'Modeling History']
 
 with st.sidebar:
-    st.header('No Code XGBoost')
+    st.title('No Code XGBoost')
+    st.markdown("""by Feng Zhao [![](https://i.stack.imgur.com/gVE0j.png) ](https://www.linkedin.com/in/felixfengzhao/)
+                &nbsp; [![](https://i.stack.imgur.com/tskMh.png) ](https://github.com/iFengZhao/no-code-xgboost)""")
+
     navigation_vertical = option_menu(
         menu_title=None,
         options=option_list,
         icons=['activity', 'body-text', 'caret-right-square', 'cloud-arrow-down'],  # https://icons.getbootstrap.com/
         styles={
             "container": {"padding": "0!important", "background-color": "#fafafa"},
-            "icon": {"color": "orange", "font-size": "15px"},
+            "icon": {"font-size": "15px"},
             "nav-link": {"font-size": "15px", "text-align": "left", "margin": "0px", "--hover-color": "#eee"},
             # "nav-link-selected": {"background-color": "green"},
         }
