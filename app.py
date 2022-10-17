@@ -243,25 +243,19 @@ if use_example_data or uploaded_file is not None:
                 xgb = XGBClassifier(objective="binary:logistic", eval_metric="auc", use_label_encoder=False)
                 xgb.set_params(**params)
                 xgb.fit(X_train, y_train)
-                model_bar = st.progress(0)
 
-                for percent_complete in range(100):
-                    time.sleep(0.1)
-                    model_bar.progress(percent_complete + 1)
-
-                st.success('Model runs successfully!')
                 return xgb
 
             # xgb = run_xgb(X_train, y_train)
-            xgb = run_xgb(ss['X_train'], ss['y_train'])
 
-            # model_bar = st.progress(0)
-            #
+
+            model_bar = st.progress(0)
+            xgb = run_xgb(ss['X_train'], ss['y_train'])
             # for percent_complete in range(100):
             #     time.sleep(0.1)
             #     model_bar.progress(percent_complete + 1)
-            #
-            # st.success('Model runs successfully!')
+            model_bar.progress(100)
+            st.success('Model runs successfully!')
 
 
             # model_metrics['precision'], model_metrics['recall'], model_metrics['f1'], model_metrics['accuracy'], roc = get_metrics(xgb, X_test, y_test)
