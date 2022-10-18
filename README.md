@@ -1,6 +1,6 @@
 ## Build a web app that runs the XGBoost model without coding using Streamlit and MongoDB
  
-This web app is built using streamlit and MongoDB. It allows the user to run the XGBoost models without writing a single line of code. For the logged in user, the model they run will be saved in the database and can be retrieved later. After the model runs successfully, the user can download the picked model for later use. They can also download a json file documenting the critical model info.
+This web app is built using streamlit and MongoDB. It allows the user to run the XGBoost models without writing a single line of code. For the logged-in user, the models they run will be saved in the database and can be retrieved later. After the model runs successfully, the user can download the picked model for later use. They can also download a json file documenting the critical model info.
 
  The app is hosted using streamlit share, and it can be accessed at  [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ifengzhao-no-code-xgboost-app-piv9vi.streamlitapp.com).
  
