@@ -180,7 +180,7 @@ def clear_session_states():
 if navigation_vertical == 'Data Exploration':
     st.header('📊 Data Exploration')
     uploaded_file = st.file_uploader('Upload a CSV file', type="csv", key='file_uploader')
-    use_example_data = st.checkbox('Use example dataset ()',
+    use_example_data = st.checkbox('Use example dataset (Sklearn datasets will be supported in later development.)',
                                    value=ss['use_example_dataset'])
     if use_example_data:
         ss['data'] = load_example_data()
@@ -438,8 +438,10 @@ if navigation_vertical == 'Modeling History':
         st.markdown('**Pick a specific model to check out**')
         filter_col1, filter_col2 = st.columns(2)
 
+        latest_day = max(pd.to_datetime(model_df['model_date']))
+
         with filter_col1:
-            selected_day = st.date_input('which day to choose', max(model_df['model_date']))
+            selected_day = st.date_input('which day to choose', latest_day)
 
         type(selected_day)
         time_list = model_df.loc[model_df['model_date'] == str(selected_day), 'model_time']
