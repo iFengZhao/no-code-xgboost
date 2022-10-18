@@ -81,7 +81,7 @@ def load_example_data():
     df = pd.read_csv('credit.csv', encoding='utf-8')
     return df
 
-
+ss
 # navigation option menu
 
 # option_list = ['📊 Data Exploration', '⏳ Parameter Tuning', '🚀 Run Model', '⚡ Modeling History']
