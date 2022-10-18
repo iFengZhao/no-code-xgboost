@@ -127,7 +127,7 @@ if authentication_status:
     st.sidebar.subheader(f"Welcome, {name} 👨‍💻")
     authenticator.logout("Logout", "sidebar")
     if ss['logout']:
-        ss['file_uploader'] = None
+        del ss['file_uploader']
         ss['use_example_dataset'] = False
         for key in ss.keys():
             del ss[key]
