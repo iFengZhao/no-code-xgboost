@@ -439,7 +439,7 @@ if navigation_vertical == 'Modeling History':
         filter_col1, filter_col2 = st.columns(2)
 
         with filter_col1:
-            selected_day = st.date_input('which day to choose')
+            selected_day = st.date_input('which day to choose', max(model_df['model_date']))
 
         type(selected_day)
         time_list = model_df.loc[model_df['model_date'] == str(selected_day), 'model_time']
