@@ -82,9 +82,7 @@ def load_example_data():
     return df
 
 
-# navigation option menu
-
-# option_list = ['📊 Data Exploration', '⏳ Parameter Tuning', '🚀 Run Model', '⚡ Modeling History']
+# navigation menu
 option_list = ['Data Exploration', 'Parameter Tuning', 'Run Model', 'Modeling History']
 
 with st.sidebar:
@@ -100,7 +98,6 @@ with st.sidebar:
             "container": {"padding": "0!important", "background-color": "#fafafa"},
             "icon": {"font-size": "15px"},
             "nav-link": {"font-size": "15px", "text-align": "left", "margin": "0px", "--hover-color": "#eee"},
-            # "nav-link-selected": {"background-color": "green"},
         }
     )
 
@@ -137,11 +134,7 @@ ss['data'] = ss.get('data', None)
 ss['col_names'] = ss.get('col_names', None)
 ss['split'] = ss.get('split', False)
 ss['use_example_dataset'] = ss.get('use_example_dataset', False)
-# col_list = list(ss['col_names'])
-# default_label_index = len(ss['col_names']) - 1
-# ss['feature_cols'] = ss.get('feature_cols', col_list)
 ss['label_col'] = ss.get('label_col', None)
-# ss['label_index'] = ss.get('label_index', default_label_index)
 ss['seed'] = ss.get('seed', 1024)
 ss['test_size'] = ss.get('test_size', 0.33)
 ss['X_train'] = ss.get('X_train', None)
@@ -173,9 +166,6 @@ def clear_session_states():
         if key in ss_list:
             del ss[key]
 
-
-# st.header('No Code XGBoost')
-# st.info('This web app allows the user to run XGBoost models without writing a single line of code.', icon="ℹ")
 
 if navigation_vertical == 'Data Exploration':
     st.header('📊 Data Exploration')
@@ -264,7 +254,6 @@ if navigation_vertical == 'Run Model':
                 none_cat_cols = list(features_df.select_dtypes(exclude='object').columns)
                 df_non_cat = features_df[none_cat_cols]
 
-                # X = df[ss['feature_cols']]
                 X = pd.concat([df_cat, df_non_cat], axis=1)
                 y = df[ss['label_col']]
                 ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test'] = train_test_split(X, y,
@@ -310,16 +299,9 @@ if navigation_vertical == 'Run Model':
                     params
 
         st.subheader('Click the button below to run the model')
-        # ss['xgb'] = ss.get('xgb', None)
-        # ss['run_model'] = ss.get('run_model', False)
-        # ss['model_metrics'] = ss.get('model_metrics', None)
-        # ss['fp_r'] = ss.get('fp_r', None)
-        # ss['tp_r'] = ss.get('tp_r', None)
-
         model_metrics = {}
         if st.button('Run XGBoost 🚀'):
             ss['run_model'] = True
-            # st.write(ss['X_train'].head())
             X_train, X_test, y_train, y_test = ss['X_train'], ss['X_test'], ss['y_train'], ss['y_test']
 
 
