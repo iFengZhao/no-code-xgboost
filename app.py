@@ -81,7 +81,7 @@ def load_example_data():
     df = pd.read_csv('credit.csv', encoding='utf-8')
     return df
 
-ss
+
 # navigation option menu
 
 # option_list = ['📊 Data Exploration', '⏳ Parameter Tuning', '🚀 Run Model', '⚡ Modeling History']
@@ -127,7 +127,6 @@ if authentication_status:
     st.sidebar.subheader(f"Welcome, {name} 👨‍💻")
     authenticator.logout("Logout", "sidebar")
     if ss['logout']:
-        del ss['file_uploader']
         ss['use_example_dataset'] = False
         for key in ss.keys():
             del ss[key]
